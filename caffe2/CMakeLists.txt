@@ -1033,7 +1033,7 @@ elseif(USE_CUDA)
       target_compile_definitions(torch_cuda PRIVATE USE_CUSPARSELT)
   endif()
   if(USE_NCCL)
-    target_link_libraries(torch_cuda PRIVATE __caffe2_nccl)
+    target_link_libraries(torch_cuda PRIVATE __caffe2_nccl fmt::fmt-header-only)
     target_compile_definitions(torch_cuda PRIVATE USE_NCCL)
   endif()
   if(USE_UCC)
@@ -1336,8 +1336,11 @@ if(BUILD_TEST)
   endif()
   if(BUILD_AOT_INDUCTOR_TEST)
     add_subdirectory(
-      ${TORCH_ROOT}/test/cpp/aot_inductor
-      ${CMAKE_BINARY_DIR}/test_aot_inductor)
+      ${TORCH_ROOT}/test/cpp/aoti_abi_check
+      ${CMAKE_BINARY_DIR}/test_aoti_abi_check)
+    add_subdirectory(
+      ${TORCH_ROOT}/test/cpp/aoti_inference
+      ${CMAKE_BINARY_DIR}/test_aoti_inference)
   endif()
 endif()
 
@@ -1773,7 +1776,7 @@ if(USE_ROCM)
     target_link_libraries(torch_hip PRIVATE ATEN_CUDA_FILES_GEN_LIB)
   endif()
   target_link_libraries(torch_hip PUBLIC torch_cpu_library ${Caffe2_PUBLIC_HIP_DEPENDENCY_LIBS})
-  target_link_libraries(torch_hip PRIVATE ${Caffe2_HIP_DEPENDENCY_LIBS})
+  target_link_libraries(torch_hip PRIVATE ${Caffe2_HIP_DEPENDENCY_LIBS} fmt::fmt-header-only)
 
   # Since PyTorch files contain HIP headers, this is also needed to capture the includes.
   target_include_directories(torch_hip PRIVATE ${Caffe2_HIP_INCLUDE})

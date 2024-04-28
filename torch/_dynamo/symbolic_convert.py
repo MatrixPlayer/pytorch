@@ -694,6 +694,11 @@ class InstructionTranslatorBase(
             self._cell_and_freevars = tuple(
                 self.code_options["co_cellvars"] or []
             ) + tuple(self.code_options["co_freevars"] or [])
+
+            # An inlined function might depend on the freevar of the parent
+            # function. So, recursively obtain parent cell and freevars.
+            if isinstance(self, InliningInstructionTranslator):
+                self._cell_and_freevars += self.parent.cell_and_freevars()
         return self._cell_and_freevars
 
     def prune_dead_locals(self):
@@ -1419,6 +1424,10 @@ class InstructionTranslatorBase(
     def STORE_SUBSCR(self, inst):
         val, obj, key = self.popn(3)
         result = obj.call_method(self, "__setitem__", [key, val], {})
+
+    def DELETE_SUBSCR(self, inst):
+        obj, key = self.popn(2)
+        obj.call_method(self, "__delitem__", [key], {})
 
     def BUILD_TUPLE(self, inst):
         items = self.popn(inst.argval)
